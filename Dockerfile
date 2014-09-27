@@ -10,19 +10,12 @@
 # Pull base image.
 FROM dockerfile/ubuntu
 
-# Add files.
-ADD bin/rabbitmq-start /usr/local/bin/
-ADD etc/rabbitmq/rabbitmq.config /etc/rabbitmq/
-ADD etc/rabbitmq/rabbitmq-env.conf /etc/rabbitmq/
-
-
-
 # Define environment variables.
 ENV RABBITMQ_LOG_BASE /data/log
 ENV RABBITMQ_MNESIA_BASE /data/mnesia
 
 # Define mount points.
-#VOLUME ["/data/log", "/data/mnesia"]
+VOLUME ["/data/log", "/data/mnesia"]
 
 # Define working directory.
 WORKDIR /data
@@ -35,12 +28,15 @@ RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y rabbitmq-server apg
 RUN rm -rf /var/lib/apt/lists/*
 
-RUN rabbitmq-plugins enable rabbitmq_management
-RUN rabbitmq-plugins enable rabbitmq_mqtt 
-
+# Add files.
+ADD bin/rabbitmq-start /usr/local/bin/
 RUN chmod +x /usr/local/bin/rabbitmq-start
 
-RUN /usr/local/bin/rabbitmq-start & sleep 10 && rabbitmqctl add_user admin admin && rabbitmqctl set_user_tags admin administrator && sleep 3 && rabbitmqctl stop
+ADD etc/rabbitmq/rabbitmq.config /etc/rabbitmq/
+ADD etc/rabbitmq/rabbitmq-env.conf /etc/rabbitmq/
+
+# initial config
+RUN rabbitmq-plugins enable rabbitmq_management rabbitmq_mqtt 
 
 # Define default command.
 CMD ["rabbitmq-start"]
