@@ -8,7 +8,7 @@
 #
 
 # Pull base image.
-FROM dockerfile/ubuntu
+FROM ubuntu
 
 # Define environment variables.
 ENV RABBITMQ_LOG_BASE /data/log
@@ -21,10 +21,12 @@ VOLUME ["/data/log", "/data/mnesia"]
 WORKDIR /data
 
 # Install RabbitMQ.
+RUN apt-get update 
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y wget
+
 RUN wget -qO - http://www.rabbitmq.com/rabbitmq-signing-key-public.asc | apt-key add - 
 RUN echo "deb http://www.rabbitmq.com/debian/ testing main" > /etc/apt/sources.list.d/rabbitmq.list 
 
-RUN apt-get update 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y rabbitmq-server apg
 RUN rm -rf /var/lib/apt/lists/*
 
